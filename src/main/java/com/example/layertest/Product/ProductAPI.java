@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j  // Causes lombok to generate a logger field.
 @RequiredArgsConstructor
@@ -31,9 +32,8 @@ public class ProductAPI {
 
     @GetMapping(path="/{id}")
     public ResponseEntity<ProductDTO> findById(@PathVariable Long id) {
-        ProductDTO productDTO = new ProductDTO();
-        productDTO.setName("P1");
-        System.out.println(productDTO);
+        Optional<Product> product = productService.findById(id);
+        ProductDTO productDTO = productMapper.toProductDTO(product.get());
         return ResponseEntity.ok(productDTO);
     }
 }
