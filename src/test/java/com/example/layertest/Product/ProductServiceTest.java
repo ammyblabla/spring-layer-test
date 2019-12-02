@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProductServiceTest {
@@ -59,5 +59,23 @@ public class ProductServiceTest {
         // then
         assertThat(actualResult).isEqualTo(expectedProduct);
 
+    }
+
+    @Test
+    public void should_return_product_when_add_product() {
+        //given
+        Product product = Product.builder()
+                .name("P1")
+                .description("P1 desc")
+                .price(new BigDecimal("1"))
+                .build();
+
+        doReturn(product).when(productRepository).save(product);
+
+        // when
+        productService.save(product);
+
+        // then
+        verify(productRepository, times(1)).save(product);
     }
 }

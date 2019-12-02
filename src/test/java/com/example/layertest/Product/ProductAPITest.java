@@ -1,17 +1,22 @@
 package com.example.layertest.Product;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
@@ -31,6 +36,21 @@ public class ProductAPITest {
 
     @MockBean
     private ProductMapper productMapper;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    private ProductDTO productDTO = ProductDTO.builder()
+        .name("P1")
+        .description("P1 desc")
+        .price(new BigDecimal("1"))
+        .build();
+
+    private Product product = Product.builder()
+        .name("P1")
+        .description("P1 desc")
+        .price(new BigDecimal("1"))
+        .build();
 
     @Test
     public void when_find_all_then_return_product_dto_list() throws Exception {
@@ -70,12 +90,29 @@ public class ProductAPITest {
         Long id = 1L;
 
         doReturn(productDTO).when(productMapper).toProductDTO(product);
-        doReturn(product).when(productService).findById(id);
+        doReturn(Optional.of(product)).when(productService).findById(id);
 
         // when
         this.mockMvc.perform(get("/products/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name", is(productDTO.getName())));
+    }
+
+    @Test
+    public void should_save_product_when_call_post_api() throws Exception {
+        // given
+        doReturn(this.product).when(productService).save(product);
+        doReturn(this.product).when(productMapper).toProduct(productDTO);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders
+                    .post("/products")
+                    .content(new ObjectMapper().writeValueAsString(product))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                )
+            .andExpect(status().isCreated())
+            .andExpect(MockMvcResultMatchers.jsonPath("$.name").exists());
     }
 
 }
