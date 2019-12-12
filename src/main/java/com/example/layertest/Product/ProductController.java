@@ -16,7 +16,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/products")
-public class ProductAPI {
+public class ProductController {
     @Autowired
     private final ProductService productService;
     private final ProductMapper productMapper;
@@ -39,5 +39,12 @@ public class ProductAPI {
     public ResponseEntity<Product> saveOne(@Valid @RequestBody ProductDTO productDTO) {
         Product product = productMapper.toProduct(productDTO);
         return new ResponseEntity<Product>(productService.save(product), HttpStatus.CREATED);
+    }
+
+    @PutMapping(path="/{id}")
+    public ResponseEntity<Product> update(@PathVariable Long id, @RequestBody ProductDTO productDTO) {
+        Product product = productMapper.toProduct(productDTO);
+        System.out.println(product);
+        return new ResponseEntity<Product>(productService.updateProduct(id, product), HttpStatus.OK);
     }
 }

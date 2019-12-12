@@ -1,5 +1,6 @@
 package com.example.layertest.Product;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @WebMvcTest
-public class ProductAPITest {
+public class ProductControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
@@ -36,9 +37,6 @@ public class ProductAPITest {
 
     @MockBean
     private ProductMapper productMapper;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     private ProductDTO productDTO = ProductDTO.builder()
         .name("P1")
@@ -51,6 +49,8 @@ public class ProductAPITest {
         .description("P1 desc")
         .price(new BigDecimal("1"))
         .build();
+
+    private Long id = 1L;
 
     @Test
     public void when_find_all_then_return_product_dto_list() throws Exception {
@@ -87,8 +87,6 @@ public class ProductAPITest {
                 .price(new BigDecimal("1"))
                 .build();
 
-        Long id = 1L;
-
         doReturn(productDTO).when(productMapper).toProductDTO(product);
         doReturn(Optional.of(product)).when(productService).findById(id);
 
@@ -111,8 +109,38 @@ public class ProductAPITest {
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON)
                 )
-            .andExpect(status().isCreated())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.name").exists());
+                .andExpect(status().isCreated())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name").exists());
     }
 
+    @Test
+    public void should_update_product_when_update_given_id() throws Exception {
+        Product newProduct = Product.builder()
+                .name("new product")
+                .description("new product desc")
+                .price(new BigDecimal("1000"))
+                .build();
+
+        ProductDTO newProductDTO = ProductDTO.builder()
+                .name("new product")
+                .description("new product desc")
+                .price(new BigDecimal("1000"))
+                .build();
+
+
+        doReturn(newProduct).when(productService).updateProduct(id,newProduct);
+        doReturn(newProduct).when(productMapper).toProduct(newProductDTO);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders
+                .put("/products/1")
+                .content(new ObjectMapper().writeValueAsString(newProduct))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+
+        )
+            .andExpect(status().isOk())
+            .andExpect(MockMvcResultMatchers.jsonPath("$.name").exists());
+
+    }
 }

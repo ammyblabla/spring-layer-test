@@ -33,10 +33,4 @@ public class Product {
 
     @NotNull
     private BigDecimal price;
-
-    @CreationTimestamp
-    private Date createAt;
-
-    @UpdateTimestamp
-    private Date updateAt;
 }

@@ -12,6 +12,8 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProductMapperTest {
+    ProductMapper productMapper;
+
     private Product product = Product.builder()
             .name("P1")
             .description("P1 desc")

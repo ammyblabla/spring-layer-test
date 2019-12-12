@@ -22,4 +22,10 @@ public class ProductService {
     public Product save(Product product) {
         return productRepository.save(product);
     }
+
+    public Product updateProduct(Long id, Product newProduct) {
+        newProduct.setId(id);
+        productRepository.save(newProduct);
+        return newProduct;
+    }
 }
